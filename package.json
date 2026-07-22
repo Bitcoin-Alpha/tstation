@@ -18,6 +18,12 @@
     "turingstation",
     "cli"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Bitcoin-Alpha/tstation.git"
+  },
+  "homepage": "https://github.com/Bitcoin-Alpha/tstation#readme",
+  "bugs": "https://github.com/Bitcoin-Alpha/tstation/issues",
   "scripts": {
     "generate": "openapi-typescript api/openapi-public.json -o src/generated/content.ts",
     "build": "tsup",
