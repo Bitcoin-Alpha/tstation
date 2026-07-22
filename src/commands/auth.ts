@@ -11,27 +11,40 @@ function promptHidden(question: string): Promise<string> {
     process.stderr.write(question);
     const { stdin } = process;
     let input = "";
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      stdin.setRawMode?.(false);
+      stdin.pause();
+      stdin.off("data", onData);
+      stdin.off("end", finish);
+      process.stderr.write("\n");
+      resolve(input);
+    };
+    const onData = (chunk: string) => {
+      for (const ch of chunk) {
+        if (ch === "\r" || ch === "\n" || ch === CTRL_D) {
+          finish();
+          return;
+        }
+        if (ch === CTRL_C) {
+          stdin.setRawMode?.(false);
+          process.stderr.write("\n");
+          process.exit(130);
+        }
+        if (ch === BACKSPACE || ch === "\b") {
+          input = input.slice(0, -1);
+        } else {
+          input += ch;
+        }
+      }
+    };
     stdin.setRawMode?.(true);
     stdin.resume();
     stdin.setEncoding("utf8");
-    const onData = (ch: string) => {
-      if (ch === "\r" || ch === "\n" || ch === CTRL_D) {
-        stdin.setRawMode?.(false);
-        stdin.pause();
-        stdin.off("data", onData);
-        process.stderr.write("\n");
-        resolve(input);
-      } else if (ch === CTRL_C) {
-        stdin.setRawMode?.(false);
-        process.stderr.write("\n");
-        process.exit(130);
-      } else if (ch === BACKSPACE || ch === "\b") {
-        input = input.slice(0, -1);
-      } else {
-        input += ch;
-      }
-    };
     stdin.on("data", onData);
+    stdin.on("end", finish);
   });
 }
 
@@ -48,7 +61,12 @@ export function authCommand(globals: () => GlobalOpts): Command {
     .option("--key <key>", "API key (prompted for if omitted)")
     .action(async (o: Record<string, string>) => {
       const g = globals();
-      const key = (o.key ?? (await promptHidden("API key: "))).trim();
+      let key = o.key;
+      if (!key) {
+        process.stderr.write("Create an API key at https://turingstation.nl/settings\n");
+        key = await promptHidden("API key (input is hidden, paste and press enter): ");
+      }
+      key = key.trim();
       if (!key) fail("no API key provided");
 
       const { data, error, response } = await makeClient(g, key).GET("/content/posts", {

@@ -50,13 +50,14 @@ tstation posts list --cursor '<next_cursor from previous page>'
 
 ## Authentication
 
-Create an API key in your Turing Station account settings, then:
+Create an API key at [turingstation.nl/settings](https://turingstation.nl/settings), then:
 
 ```bash
 tstation auth login
 ```
 
-The key is verified against the API and stored in
+Paste the key at the prompt — input is hidden, so nothing appears while you
+type. The key is verified against the API and stored in
 `~/.config/tstation/config.json` (mode 0600). Alternatively, set
 `TSTATION_API_KEY` in the environment or pass `--api-key` per invocation;
 those take precedence over the stored key, in that order: flag, environment,

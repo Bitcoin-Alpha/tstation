@@ -13,7 +13,7 @@ const program = new Command("tstation")
   .description(
     "Command-line client for the Turing Station public API.\n\n" +
       "Works without authentication for publicly visible content. Create an API key\n" +
-      'in your Turing Station account settings and run "tstation auth login" to\n' +
+      'at https://turingstation.nl/settings and run "tstation auth login" to\n' +
       "unlock the content your membership includes.",
   )
   .version(pkg.version)
