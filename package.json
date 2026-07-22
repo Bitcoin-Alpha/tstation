@@ -1,5 +1,5 @@
 {
-  "name": "tstation",
+  "name": "@label21/tstation",
   "version": "0.1.0",
   "description": "Command-line client for the Turing Station public API",
   "license": "MIT",

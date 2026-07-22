@@ -10,13 +10,13 @@ Turing Station account settings, it unlocks the content your membership includes
 No install needed:
 
 ```bash
-npx tstation posts list
+npx @label21/tstation posts list
 ```
 
-Or install globally:
+Or install globally to get the `tstation` command:
 
 ```bash
-npm install -g tstation
+npm install -g @label21/tstation
 ```
 
 ## Commands
