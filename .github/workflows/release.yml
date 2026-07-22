@@ -16,12 +16,12 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: pnpm
           registry-url: "https://registry.npmjs.org"
+      # Trusted publishing (OIDC) needs npm >= 11.5.1
+      - run: npm install -g npm@latest
       - run: pnpm install --frozen-lockfile
       - name: Set package version from tag
         run: npm version --no-git-tag-version --allow-same-version "${GITHUB_REF_NAME#v}"
-      - run: pnpm publish --access public --no-git-checks --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: npm publish --access public
