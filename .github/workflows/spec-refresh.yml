@@ -1,0 +1,35 @@
+name: spec-refresh
+
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch latest public spec
+        run: curl -fsSL https://docs.turingstation.nl/content/openapi-public.json -o api/openapi-public.json
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm generate
+      - uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: "feat(api): refresh public openapi spec"
+          title: "feat(api): refresh public openapi spec"
+          body: |
+            Automated regeneration from https://docs.turingstation.nl/content/openapi-public.json.
+            Review the type diff for new or changed endpoints before merging; new endpoints
+            also need commands wired up in src/commands/.
+          branch: spec-refresh
+          delete-branch: true

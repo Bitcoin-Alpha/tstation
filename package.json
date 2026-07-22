@@ -1,0 +1,37 @@
+{
+  "name": "tstation",
+  "version": "0.1.0",
+  "description": "Command-line client for the Turing Station public API",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "tstation": "dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@10.25.0",
+  "keywords": [
+    "turingstation",
+    "cli"
+  ],
+  "scripts": {
+    "generate": "openapi-typescript api/openapi-public.json -o src/generated/content.ts",
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm typecheck && pnpm build"
+  },
+  "dependencies": {
+    "commander": "^14.0.0",
+    "openapi-fetch": "^0.14.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "openapi-typescript": "^7.13.0",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.0"
+  }
+}
