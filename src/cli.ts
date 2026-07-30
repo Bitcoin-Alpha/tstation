@@ -3,6 +3,8 @@ import { Command } from "commander";
 import type { GlobalOpts } from "./client.js";
 import { DEFAULT_API_URL } from "./client.js";
 import { authCommand } from "./commands/auth.js";
+import { completionCommand } from "./commands/completion.js";
+import { completeWords } from "./completion.js";
 import { postsCommand } from "./commands/posts.js";
 import { transcriptsCommand } from "./commands/transcripts.js";
 
@@ -27,6 +29,19 @@ const globals = () => program.opts<GlobalOpts>();
 program.addCommand(postsCommand(globals));
 program.addCommand(transcriptsCommand(globals));
 program.addCommand(authCommand(globals));
+program.addCommand(completionCommand());
+
+// Hidden hook used by the shell completion scripts: prints candidates for the
+// words typed so far, one per line. Handled before commander so flags in the
+// words are never parsed.
+if (process.argv[2] === "__complete") {
+  try {
+    console.log(completeWords(program, process.argv.slice(3)).join("\n"));
+  } catch {
+    // never break the user's shell
+  }
+  process.exit(0);
+}
 
 program.parseAsync().catch((err: unknown) => {
   console.error(`error: ${err instanceof Error ? err.message : String(err)}`);

@@ -38,6 +38,9 @@ tstation transcripts get turing-station 3  # read a transcript
 tstation auth login                        # verify and store an API key
 tstation auth status                       # show active key and source
 tstation auth logout                       # remove the stored key
+
+tstation completion install                # set up tab-completion for your shell
+tstation completion zsh                    # or print the script (zsh, bash, fish)
 ```
 
 Every command accepts `--json` for raw API output, which makes the CLI easy to
@@ -52,6 +55,22 @@ Paginate with the cursor printed at the end of a page:
 ```bash
 tstation posts list --cursor '<next_cursor from previous page>'
 ```
+
+## Tab-completion
+
+```bash
+tstation completion install
+```
+
+Detects your shell from `$SHELL` (zsh, bash, or fish) and installs completion:
+for fish it drops a file in `~/.config/fish/completions/`; for zsh and bash it
+writes the script to `~/.config/tstation/` and adds a `source` line to your rc
+file. Completions are computed live by the CLI itself (`tstation __complete`),
+so commands, flags, and flag values stay in sync with the installed version —
+including things like `--read-status <TAB>` → `all read unread`.
+
+Prefer to wire it up yourself? `tstation completion zsh` (or `bash`/`fish`)
+prints the script to stdout.
 
 ## Authentication
 
