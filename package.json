@@ -1,6 +1,6 @@
 {
   "name": "@label21/tstation",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Command-line client for the Turing Station public API",
   "license": "MIT",
   "type": "module",
