@@ -13,7 +13,7 @@ export interface paths {
         };
         /**
          * List posts
-         * @description Keyset-paginated list of Ghost posts. Supports optional authentication for personalized content, reading progress, and access control. When authenticated, includes reading_progress with scroll percentage and read status for each post.
+         * @description Keyset-paginated list of posts. Supports optional authentication for personalized content, reading progress, and access control. When authenticated, includes reading_progress with scroll percentage and read status for each post.
          */
         get: operations["list-posts"];
         put?: never;
@@ -33,7 +33,7 @@ export interface paths {
         };
         /**
          * Get available tags
-         * @description Get all available Ghost post tags for filtering.
+         * @description Get all available post tags for filtering.
          */
         get: operations["get-post-tags"];
         put?: never;
@@ -64,6 +64,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/content/transcripts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List or search transcripts
+         * @description Page through transcript summaries, or full-text search them with the search param (ranked, with a highlighted snippet per hit). Requires a member JWT or API key; the full transcript text is only served by the detail endpoint.
+         */
+        get: operations["list-transcripts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/content/transcripts/{show}/{episode}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a transcript
+         * @description Full transcript for one episode, including the inline [HH:MM:SS] speaker markers. Requires a member JWT or API key.
+         */
+        get: operations["get-transcript"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -81,6 +121,29 @@ export interface components {
             /** Format: int64 */
             status: number;
             title: string;
+        };
+        Detail: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/Detail.json
+             */
+            readonly $schema?: string;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: int64 */
+            episode: number;
+            /** Format: int64 */
+            pipeline_version?: number;
+            /** Format: date-time */
+            processed_at?: string;
+            show: string;
+            title?: string;
+            transcript: string;
+            /** Format: date-time */
+            updated_at: string;
+            /** Format: int64 */
+            word_count?: number;
         };
         ErrorDetail: {
             location?: string;
@@ -100,6 +163,38 @@ export interface components {
             items: components["schemas"]["Post"][] | null;
             /** @description Cursor for the next page; empty when has_more is false */
             next_cursor?: string;
+            /**
+             * Format: int64
+             * @description Current page (offset pagination only)
+             */
+            page?: number;
+            /**
+             * Format: int64
+             * @description Total matching posts (offset pagination only)
+             */
+            total?: number;
+            /**
+             * Format: int64
+             * @description Total pages at this limit (offset pagination only)
+             */
+            total_pages?: number;
+        };
+        ListTranscriptsResponseBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/ListTranscriptsResponseBody.json
+             */
+            readonly $schema?: string;
+            /** @description Whether more items are available */
+            has_more: boolean;
+            /** @description Transcript summaries (full text only on the detail endpoint) */
+            items: components["schemas"]["Summary"][] | null;
+            /**
+             * Format: int64
+             * @description Current page
+             */
+            page: number;
         };
         Post: {
             author?: string;
@@ -114,6 +209,8 @@ export interface components {
             slug: string;
             tags: string[] | null;
             title: string;
+            /** Format: date-time */
+            updated_at: string;
             visibility?: string;
         };
         PostDetail: {
@@ -134,11 +231,44 @@ export interface components {
             published_at: string;
             /** Format: int64 */
             reading_time?: number;
+            seo?: components["schemas"]["PostSEO"];
             slug: string;
             source_id: string;
             tags: string[] | null;
             title: string;
+            /** Format: date-time */
+            updated_at: string;
             visibility?: string;
+        };
+        PostSEO: {
+            canonical_url?: string;
+            meta_description?: string;
+            meta_title?: string;
+            og_description?: string;
+            og_image?: string;
+            og_title?: string;
+            twitter_description?: string;
+            twitter_image?: string;
+            twitter_title?: string;
+        };
+        Summary: {
+            /** Format: int64 */
+            episode: number;
+            /** Format: date-time */
+            processed_at?: string;
+            /**
+             * Format: double
+             * @description Search relevance (search results only)
+             */
+            rank?: number;
+            show: string;
+            /** @description Highlighted match fragment with <mark> tags (search results only) */
+            snippet?: string;
+            title?: string;
+            /** Format: date-time */
+            updated_at: string;
+            /** Format: int64 */
+            word_count?: number;
         };
         Tag: {
             /** Format: int64 */
@@ -170,6 +300,8 @@ export interface operations {
             query?: {
                 /** @description Opaque pagination cursor from a prior response's next_cursor; empty for the first page */
                 cursor?: string;
+                /** @description 1-based page for offset pagination with totals; mutually exclusive with cursor (cursor wins when both are sent) */
+                page?: number;
                 /** @description Items per page */
                 limit?: number;
                 /** @description Comma-separated tags to filter by */
@@ -261,6 +393,78 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PostDetail"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AppError"];
+                };
+            };
+        };
+    };
+    "list-transcripts": {
+        parameters: {
+            query?: {
+                /** @description Full-text search query; when set, results are ranked and carry a snippet */
+                search?: string;
+                /** @description Filter by show slug */
+                show?: string;
+                /** @description 1-based page */
+                page?: number;
+                /** @description Items per page */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListTranscriptsResponseBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AppError"];
+                };
+            };
+        };
+    };
+    "get-transcript": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Show slug */
+                show: string;
+                /** @description Episode number */
+                episode: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Detail"];
                 };
             };
             /** @description Error */

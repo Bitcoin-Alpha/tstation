@@ -38,10 +38,14 @@ export function fail(message: string): never {
 }
 
 export function apiFail(error: AppError | undefined, response: Response): never {
+  if (typeof error === "string") fail(`${error} (HTTP ${response.status})`);
   if (error) {
-    const message = error.message || error.title;
-    const detail = error.detail && error.detail !== message ? ` — ${error.detail}` : "";
-    fail(`${message}${detail} (HTTP ${response.status})`);
+    // Some middleware errors (e.g. auth) use a plain {"error": "..."} body instead of AppError.
+    const message = error.message || error.title || (error as { error?: string }).error;
+    if (message) {
+      const detail = error.detail && error.detail !== message ? ` — ${error.detail}` : "";
+      fail(`${message}${detail} (HTTP ${response.status})`);
+    }
   }
   fail(`unexpected response (HTTP ${response.status})`);
 }

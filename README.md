@@ -30,6 +30,11 @@ tstation posts get <id-or-slug>            # read a post
 tstation posts get <id-or-slug> --formats plaintext,lexical
 tstation posts tags                        # list available tags
 
+tstation transcripts list                  # list podcast transcripts
+tstation transcripts list --show turing-station --page 2
+tstation transcripts list --search "lokaal model"   # full-text search with snippets
+tstation transcripts get turing-station 3  # read a transcript
+
 tstation auth login                        # verify and store an API key
 tstation auth status                       # show active key and source
 tstation auth logout                       # remove the stored key

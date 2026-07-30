@@ -4,6 +4,7 @@ import type { GlobalOpts } from "./client.js";
 import { DEFAULT_API_URL } from "./client.js";
 import { authCommand } from "./commands/auth.js";
 import { postsCommand } from "./commands/posts.js";
+import { transcriptsCommand } from "./commands/transcripts.js";
 
 const pkg = JSON.parse(fs.readFileSync(new URL("../package.json", import.meta.url), "utf8")) as {
   version: string;
@@ -24,6 +25,7 @@ const program = new Command("tstation")
 const globals = () => program.opts<GlobalOpts>();
 
 program.addCommand(postsCommand(globals));
+program.addCommand(transcriptsCommand(globals));
 program.addCommand(authCommand(globals));
 
 program.parseAsync().catch((err: unknown) => {
