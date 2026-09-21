@@ -122,6 +122,14 @@ export interface components {
             status: number;
             title: string;
         };
+        DestinationCopy: {
+            /** @description Archive page intro; empty when the destination has none */
+            intro: string;
+            /** @description Archive page title */
+            title: string;
+            /** @description Optional browser-tab title format, e.g. "%s | Kennis" */
+            titleFormat?: string;
+        };
         Detail: {
             /**
              * Format: uri
@@ -157,6 +165,8 @@ export interface components {
              * @example https://example.com/GetPostsResponseBody.json
              */
             readonly $schema?: string;
+            /** @description Archive copy of the destination (destination-filtered lists only) */
+            destination_copy?: components["schemas"]["DestinationCopy"];
             /** @description Whether more items are available */
             has_more: boolean;
             /** @description Feed items */
@@ -198,8 +208,12 @@ export interface components {
         };
         Post: {
             author?: string;
+            /** @description All author names (destination-filtered lists only) */
+            authors?: string[] | null;
             excerpt?: string;
             featured: boolean;
+            /** @description Guide metadata (kennis-routed posts on destination-filtered lists only) */
+            guide?: components["schemas"]["PostGuide"];
             id: string;
             image_url?: string;
             /** Format: date-time */
@@ -239,6 +253,14 @@ export interface components {
             /** Format: date-time */
             updated_at: string;
             visibility?: string;
+        };
+        PostGuide: {
+            /** @description 'Wat je leert' bullets; empty when unset */
+            learnings?: string[] | null;
+            /** @description starter | licht-gevorderd | gevorderd; empty when unset */
+            level?: string;
+            /** @description One-line summary; empty when unset */
+            summary?: string;
         };
         PostSEO: {
             canonical_url?: string;
@@ -312,6 +334,8 @@ export interface operations {
                 read_status?: "all" | "read" | "unread";
                 /** @description Filter by featured flag; omit for all posts */
                 featured?: "true" | "false";
+                /** @description List posts routed to this tag_destinations destination (e.g. nieuwsbrief:podcast, kennis): offset-paged, with the destination's archive copy; combines only with page and limit */
+                destination?: string;
             };
             header?: never;
             path?: never;
